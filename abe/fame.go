@@ -109,7 +109,7 @@ type FAMECipher struct {
 // returns an encryption of the message. In case of a failed procedure an error
 // is returned. Note that safety of the encryption is only proved if the mapping
 // msp.RowToAttrib from the rows of msp.Mat to attributes is injective.
-func (a *FAME) Encrypt(msg string, msp *MSP, pk *FAMEPubKey) (*FAMECipher, error) {
+func (a *FAME) Encrypt(msg []byte, msp *MSP, pk *FAMEPubKey) (*FAMECipher, error) {
 	if len(msp.Mat) == 0 || len(msp.Mat[0]) == 0 {
 		return nil, fmt.Errorf("empty msp matrix")
 	}
@@ -143,7 +143,7 @@ func (a *FAME) Encrypt(msg string, msp *MSP, pk *FAMEPubKey) (*FAMECipher, error
 	}
 	encrypterCBC := cbc.NewCBCEncrypter(c, iv)
 
-	msgByte := []byte(msg)
+	msgByte := msg
 
 	// message is padded according to pkcs7 standard
 	padLen := c.BlockSize() - (len(msgByte) % c.BlockSize())
@@ -330,7 +330,7 @@ func (a *FAME) GenerateAttribKeys(gamma []string, sk *FAMESecKey) (*FAMEAttribKe
 // the cipher. This is possible only if the set of possessed attributes (and
 // corresponding keys FAMEAttribKeys) suffices the encryption policy of the
 // cipher. If this is not possible, an error is returned.
-func (a *FAME) Decrypt(cipher *FAMECipher, key *FAMEAttribKeys, pk *FAMEPubKey) (string, error) {
+func (a *FAME) Decrypt(cipher *FAMECipher, key *FAMEAttribKeys, pk *FAMEPubKey) ([]byte, error) {
 	// find out which attributes are owned
 	attribMap := make(map[string]bool)
 	for k := range key.AttribToI {
@@ -360,24 +360,24 @@ func (a *FAME) Decrypt(cipher *FAMECipher, key *FAMEAttribKeys, pk *FAMEPubKey) 
 
 	matForKey, err := data.NewMatrix(preMatForKey)
 	if err != nil {
-		return "", fmt.Errorf("the provided cipher is faulty")
+		return nil, fmt.Errorf("the provided cipher is faulty")
 	}
 
 	// matForKey may have a len of 0 if there is a single condition
 	if len(matForKey) == 0 {
-		return "", fmt.Errorf("provided key is not sufficient for decryption")
+		return nil, fmt.Errorf("provided key is not sufficient for decryption")
 	}
 
 	// get a combination alpha of keys needed to decrypt
 	// matForKey may have a len of 0 if there is a single condition
 	if len(matForKey) == 0 {
-		return "", fmt.Errorf("provided key is not sufficient for decryption")
+		return nil, fmt.Errorf("provided key is not sufficient for decryption")
 	}
 	oneVec := data.NewConstantVector(len(matForKey[0]), big.NewInt(0))
 	oneVec[0].SetInt64(1)
 	alpha, err := data.GaussianEliminationSolver(matForKey.Transpose(), oneVec, a.P)
 	if err != nil {
-		return "", fmt.Errorf("provided key is not sufficient for decryption")
+		return nil, fmt.Errorf("provided key is not sufficient for decryption")
 	}
 
 	// get a CBC key needed for the decryption of msg
@@ -404,7 +404,7 @@ func (a *FAME) Decrypt(cipher *FAMECipher, key *FAMEAttribKeys, pk *FAMEPubKey) 
 
 	c, err := aes.NewCipher(keyCBC[:])
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	msgPad := make([]byte, len(cipher.SymEnc))
@@ -414,9 +414,9 @@ func (a *FAME) Decrypt(cipher *FAMECipher, key *FAMEAttribKeys, pk *FAMEPubKey) 
 	// unpad the message
 	padLen := int(msgPad[len(msgPad)-1])
 	if (len(msgPad) - padLen) < 0 {
-		return "", fmt.Errorf("failed to decrypt")
+		return nil, fmt.Errorf("failed to decrypt")
 	}
 	msgByte := msgPad[0:(len(msgPad) - padLen)]
 
-	return string(msgByte), nil
+	return msgByte, nil
 }
