@@ -19,12 +19,12 @@ import (
 )
 
 type LightFAMECipher struct {
-	Ct     [][3]*bn256.G1
-	Msp    *MSP
-	SymEnc []byte // symmetric encryption of the message
-	Iv     []byte // initialization vector for symmetric encryption
-	S      data.Vector
-	KeyGt  *bn256.GT
+	Ct           [][3]*bn256.G1
+	Msp          *MSP
+	SymEnc       []byte // symmetric encryption of the message
+	Iv           []byte // initialization vector for symmetric encryption
+	S            data.Vector
+	CbcRandomKey *big.Int
 }
 
 func genCt0(s data.Vector, pk *FAMEPubKey) [3]*bn256.G2 {
@@ -57,7 +57,7 @@ func (a *FAME) LightEncrypt(msg []byte, msp *MSP, pk *FAMEPubKey) (*LightFAMECip
 
 	// msg is encrypted using CBC, with a random key that is encapsulated
 	// with FAME
-	_, keyGt, err := bn256.RandomGT(rand.Reader)
+	cbcRandomKey, keyGt, err := bn256.RandomGT(rand.Reader)
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +138,7 @@ func (a *FAME) LightEncrypt(msg []byte, msp *MSP, pk *FAMEPubKey) (*LightFAMECip
 		}
 	}
 
-	return &LightFAMECipher{Ct: ct, Msp: msp, SymEnc: symEnc, Iv: iv, S: s, KeyGt: keyGt}, nil
+	return &LightFAMECipher{Ct: ct, Msp: msp, SymEnc: symEnc, Iv: iv, S: s, CbcRandomKey: cbcRandomKey}, nil
 }
 
 func (a *FAME) LightDecrypt(cipher *LightFAMECipher, key *FAMEAttribKeys, pk *FAMEPubKey) ([]byte, error) {
@@ -192,7 +192,7 @@ func (a *FAME) LightDecrypt(cipher *LightFAMECipher, key *FAMEAttribKeys, pk *FA
 	}
 
 	// get a CBC key needed for the decryption of msg
-	ctPrime := genCtPrime(cipher.S, pk, cipher.KeyGt)
+	ctPrime := genCtPrime(cipher.S, pk, bn256.GetGTByK(cipher.CbcRandomKey))
 	keyGt := new(bn256.GT).Set(ctPrime)
 
 	ctProd := new([3]*bn256.G1)
