@@ -9,6 +9,8 @@ github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZN
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
+github.com/tuyu123/bn256 v0.0.0-20220226044845-6b31fd629558 h1:KfEg6kJfyP/8Yt8o1TZwB7e9k/QgbgFe9m9dkpvTqy8=
+github.com/tuyu123/bn256 v0.0.0-20220226044845-6b31fd629558/go.mod h1:uHdyFpfCfVR3JLrwEqw0sSyWo7OLQfyLlQWUCiUWOMk=
 golang.org/x/crypto v0.0.0-20211115234514-b4de73f9ece8 h1:5QRxNnVsaJP6NAse0UdkRgL3zHMvCRRkrDVLNdNpdy4=
 golang.org/x/crypto v0.0.0-20211115234514-b4de73f9ece8/go.mod h1:GvvjBRRGRdwPK5ydBHafDWAxML/pGHZbMvKqRZ5+Abc=
 golang.org/x/net v0.0.0-20210226172049-e18ecbb05110/go.mod h1:m0MpNAwzfU5UDzcl9v0D8zg8gWTRqZa9RBIspLL5mdg=
