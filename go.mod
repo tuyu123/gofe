@@ -9,4 +9,4 @@ require (
 	golang.org/x/crypto v0.0.0-20211115234514-b4de73f9ece8
 )
 
-replace github.com/fentec-project/bn256 v0.0.0-20190726093940-0d0fc8bfeed0 => github.com/tuyu123/bn256 v0.0.0-20220227085633-99b4f53a20e6
+replace github.com/fentec-project/bn256 v0.0.0-20190726093940-0d0fc8bfeed0 => github.com/tuyu123/bn256 v0.0.0-20220228100430-60bc0213f21b
