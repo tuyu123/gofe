@@ -19,7 +19,6 @@ import (
 )
 
 type LightFAMECipher struct {
-	Ct           [][3]*bn256.G1
 	Msp          *MSP
 	SymEnc       []byte // symmetric encryption of the message
 	Iv           []byte // initialization vector for symmetric encryption
@@ -39,6 +38,53 @@ func genCtPrime(s data.Vector, pk *FAMEPubKey, keyGt *bn256.GT) *bn256.GT {
 	ctPrime.Add(ctPrime, new(bn256.GT).ScalarMult(pk.PartGT[1], s[1]))
 	ctPrime.Add(ctPrime, keyGt)
 	return ctPrime
+}
+
+func genCt(msp *MSP, s data.Vector) ([][3]*bn256.G1, error) {
+	ct := make([][3]*bn256.G1, len(msp.Mat))
+	for i := 0; i < len(msp.Mat); i++ {
+		for l := 0; l < 3; l++ {
+			hs1, err := bn256.HashG1(msp.RowToAttrib[i] + " " + strconv.Itoa(l) + " 0")
+			if err != nil {
+				return nil, err
+			}
+			hs1.ScalarMult(hs1, s[0])
+
+			hs2, err := bn256.HashG1(msp.RowToAttrib[i] + " " + strconv.Itoa(l) + " 1")
+			if err != nil {
+				return nil, err
+			}
+			hs2.ScalarMult(hs2, s[1])
+
+			ct[i][l] = new(bn256.G1).Add(hs1, hs2)
+			for j := 0; j < len(msp.Mat[0]); j++ {
+				hs1, err = bn256.HashG1("0 " + strconv.Itoa(j) + " " + strconv.Itoa(l) + " 0")
+				if err != nil {
+					return nil, err
+				}
+				hs1.ScalarMult(hs1, s[0])
+
+				hs2, err = bn256.HashG1("0 " + strconv.Itoa(j) + " " + strconv.Itoa(l) + " 1")
+				if err != nil {
+					return nil, err
+				}
+				hs2.ScalarMult(hs2, s[1])
+
+				hsToM := new(bn256.G1).Add(hs1, hs2)
+				pow := new(big.Int).Set(msp.Mat[i][j])
+				if pow.Sign() == -1 {
+					pow.Neg(pow)
+					hsToM.ScalarMult(hsToM, pow)
+					hsToM.Neg(hsToM)
+				} else {
+					hsToM.ScalarMult(hsToM, pow)
+				}
+				ct[i][l].Add(ct[i][l], hsToM)
+			}
+		}
+	}
+
+	return ct, nil
 }
 
 func (a *FAME) LightEncrypt(msg []byte, msp *MSP, pk *FAMEPubKey) (*LightFAMECipher, error) {
@@ -95,50 +141,7 @@ func (a *FAME) LightEncrypt(msg []byte, msp *MSP, pk *FAMEPubKey) (*LightFAMECip
 		return nil, err
 	}
 
-	ct := make([][3]*bn256.G1, len(msp.Mat))
-	for i := 0; i < len(msp.Mat); i++ {
-		for l := 0; l < 3; l++ {
-			hs1, err := bn256.HashG1(msp.RowToAttrib[i] + " " + strconv.Itoa(l) + " 0")
-			if err != nil {
-				return nil, err
-			}
-			hs1.ScalarMult(hs1, s[0])
-
-			hs2, err := bn256.HashG1(msp.RowToAttrib[i] + " " + strconv.Itoa(l) + " 1")
-			if err != nil {
-				return nil, err
-			}
-			hs2.ScalarMult(hs2, s[1])
-
-			ct[i][l] = new(bn256.G1).Add(hs1, hs2)
-			for j := 0; j < len(msp.Mat[0]); j++ {
-				hs1, err = bn256.HashG1("0 " + strconv.Itoa(j) + " " + strconv.Itoa(l) + " 0")
-				if err != nil {
-					return nil, err
-				}
-				hs1.ScalarMult(hs1, s[0])
-
-				hs2, err = bn256.HashG1("0 " + strconv.Itoa(j) + " " + strconv.Itoa(l) + " 1")
-				if err != nil {
-					return nil, err
-				}
-				hs2.ScalarMult(hs2, s[1])
-
-				hsToM := new(bn256.G1).Add(hs1, hs2)
-				pow := new(big.Int).Set(msp.Mat[i][j])
-				if pow.Sign() == -1 {
-					pow.Neg(pow)
-					hsToM.ScalarMult(hsToM, pow)
-					hsToM.Neg(hsToM)
-				} else {
-					hsToM.ScalarMult(hsToM, pow)
-				}
-				ct[i][l].Add(ct[i][l], hsToM)
-			}
-		}
-	}
-
-	return &LightFAMECipher{Ct: ct, Msp: msp, SymEnc: symEnc, Iv: iv, S: s, CbcRandomKey: cbcRandomKey}, nil
+	return &LightFAMECipher{Msp: msp, SymEnc: symEnc, Iv: iv, S: s, CbcRandomKey: cbcRandomKey}, nil
 }
 
 func (a *FAME) LightDecrypt(cipher *LightFAMECipher, key *FAMEAttribKeys, pk *FAMEPubKey) ([]byte, error) {
@@ -155,6 +158,11 @@ func (a *FAME) LightDecrypt(cipher *LightFAMECipher, key *FAMEAttribKeys, pk *FA
 		}
 	}
 
+	ct, err := genCt(cipher.Msp, cipher.S)
+	if err != nil {
+		return nil, err
+	}
+
 	// create a matrix of needed keys
 	preMatForKey := make([]data.Vector, countAttrib)
 	ctForKey := make([][3]*bn256.G1, countAttrib)
@@ -163,7 +171,7 @@ func (a *FAME) LightDecrypt(cipher *LightFAMECipher, key *FAMEAttribKeys, pk *FA
 	for i := 0; i < len(cipher.Msp.Mat); i++ {
 		if attribMap[cipher.Msp.RowToAttrib[i]] {
 			preMatForKey[countAttrib] = cipher.Msp.Mat[i]
-			ctForKey[countAttrib] = cipher.Ct[i]
+			ctForKey[countAttrib] = ct[i]
 			rowToAttrib[countAttrib] = cipher.Msp.RowToAttrib[i]
 			countAttrib++
 		}
