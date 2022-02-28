@@ -1,7 +1,5 @@
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/fentec-project/bn256 v0.0.0-20190726093940-0d0fc8bfeed0 h1:mkWVpEiA+MMlWxElUXRqTVSH9eETZvqJ21NZTaDaMiI=
-github.com/fentec-project/bn256 v0.0.0-20190726093940-0d0fc8bfeed0/go.mod h1:llEBqR6SDQxLj2lH10BjIYPrcoqDAFv6mhsqvHfIzlI=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
@@ -9,8 +7,8 @@ github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZN
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
-github.com/tuyu123/bn256 v0.0.0-20220226044845-6b31fd629558 h1:KfEg6kJfyP/8Yt8o1TZwB7e9k/QgbgFe9m9dkpvTqy8=
-github.com/tuyu123/bn256 v0.0.0-20220226044845-6b31fd629558/go.mod h1:uHdyFpfCfVR3JLrwEqw0sSyWo7OLQfyLlQWUCiUWOMk=
+github.com/tuyu123/bn256 v0.0.0-20220227085633-99b4f53a20e6 h1:3zC1tvK1+ks5pJfJ5VXWhMYiz0IWuOk8m+TLyq9f9S4=
+github.com/tuyu123/bn256 v0.0.0-20220227085633-99b4f53a20e6/go.mod h1:uHdyFpfCfVR3JLrwEqw0sSyWo7OLQfyLlQWUCiUWOMk=
 golang.org/x/crypto v0.0.0-20211115234514-b4de73f9ece8 h1:5QRxNnVsaJP6NAse0UdkRgL3zHMvCRRkrDVLNdNpdy4=
 golang.org/x/crypto v0.0.0-20211115234514-b4de73f9ece8/go.mod h1:GvvjBRRGRdwPK5ydBHafDWAxML/pGHZbMvKqRZ5+Abc=
 golang.org/x/net v0.0.0-20210226172049-e18ecbb05110/go.mod h1:m0MpNAwzfU5UDzcl9v0D8zg8gWTRqZa9RBIspLL5mdg=
